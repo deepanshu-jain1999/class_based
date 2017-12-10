@@ -6,6 +6,7 @@ from django.contrib.auth.views import login
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.http import Http404
 
 
 class Signup(ListView):
@@ -62,23 +63,28 @@ class Home(ListView):
 
 class ValidateUsername(ListView):
 
-    def get(self, request, *args, **kwargs):
-        username = request.GET.get('username', None)
-        data = {
-            'is_taken': User.objects.filter(username__iexact=username).exists()
-        }
-        return JsonResponse(data)
 
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            username = request.GET.get('username', None)
+            data = {
+                'is_taken': User.objects.filter(username__iexact=username).exists()
+            }
+            return JsonResponse(data)
+        else:
+            raise Http404
 
 class ValidateEmail(ListView):
 
     def get(self, request, *args, **kwargs):
-        email = request.GET.get('email', None)
-        data = {
-            'is_taken': User.objects.filter(email__iexact=email).exists()
-        }
-        return JsonResponse(data)
-
+        if request.is_ajax():
+            email = request.GET.get('email', None)
+            data = {
+                'is_taken': User.objects.filter(email__iexact=email).exists()
+            }
+            return JsonResponse(data)
+        else:
+            raise Http404
 
 
 
