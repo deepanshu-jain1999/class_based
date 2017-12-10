@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1> please signup here</h1>
+<form method="post">
+    {% csrf_token %}
+             <div class="details">
+                        <div class="row">
+                            <label for="name">{{ form.username.label_tag }}</label><br>
+                            {{ form.username }}<br>
+                                <p id="error_signup_username" style="color: #ff0000">{{ form.username.errors }}
+                        </div>
+
+                    <div class="row">
+                            <label for="name">{{ form.email.label_tag }}</label><br>
+                            {{ form.email }}<br>
+                                <p id="error_signup_email" style="color: #ff0000">{{ form.email.errors }}</p>
+                        </div>
+
+                    <div class="row">
+                            <label for="name">{{ form.password1.label_tag }}</label><br>
+                            {{ form.password1 }}<br>
+                                <p id="error_signup_password"style="color: #ff0000">{{ form.password1.errors }}</p>
+                        </div>
+
+                    <div class="row">
+                            <label for="name">{{ form.password2.label_tag }}</label><br>
+                            {{ form.password2 }}<br>
+                                <p id="error_signup_conf_password" style="color: #ff0000">{{ form.password2.errors }}</p>
+                        </div>
+
+
+                    </div>
+    <button type="submit">submit</button>
+</form>
+</body>
+</html>
+
