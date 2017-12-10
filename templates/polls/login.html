@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>login here</h1>
+ <form method="post">
+     {% csrf_token %}
+     <div class="log details">
+         <div class="row">
+             <label id="id_username">{{ form.username.label_tag }}</label>
+             <p id="id_username"> {{ form.username }}</p>
+             <p style="color: red" id="error_login_username"></p>
+
+         </div>
+         <div class="row">
+             <label>{{ form.password.label_tag }}</label><p id="id_password">{{ form.password }}</p>
+             <p style="color: red" id="error_login_password" style="color: red"></p>
+         </div>
+         {% if form.errors %}
+             <p style="color: red">your username and  password does not <br>match. please try again </p>
+         {% endif %}
+         <br>
+     </div>
+     <button class="log button" type="submit">LOG-IN</button>
+
+
+     </p>
+ </form>
+ New User? <a href="{% url 'signup' %}">signup</a>
+</body>
+</html>
