@@ -1,12 +1,14 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script ></script>
 </head>
 <body>
 <h1>login here</h1>
- <form method="post">
+ <form name="loginForm" method="post" onsubmit="return loginValidate()" novalidate>
      {% csrf_token %}
      <div class="log details">
          <div class="row">
@@ -30,5 +32,9 @@
      </p>
  </form>
  New User? <a href="{% url 'signup' %}">signup</a>
+
+
+<script src="{% static 'polls/javascript/validation.js' %}"></script>
+
 </body>
 </html>

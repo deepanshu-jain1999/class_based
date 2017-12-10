@@ -1,12 +1,16 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 <h1> please signup here</h1>
-<form method="post">
+<form name="signForm" method="post" onsubmit="return signupValidate()" novalidate>
     {% csrf_token %}
              <div class="details">
                         <div class="row">
@@ -38,6 +42,50 @@
     <button type="submit">submit</button>
 </form>
 <a href="{% url 'login' %}"><h3>login</h3></a>
+<script src="{% static 'polls/javascript/validation.js' %}"></script>
+
+<script>
+    $(document).ready(function() {
+        $("#id_username").change(function () {
+            var username = $(this).val();
+            $("#error_signup_username").empty();
+            console.log("tgtgtgt");
+            $.ajax({
+                url: '{% url 'validate_username' %}',
+                data: {
+                    'username': username
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_taken) {
+                        document.getElementById('error_signup_username').innerHTML="this user already exist";
+                    }
+                }
+            })
+        });
+        $("#id_email").change(function () {
+            var email = $(this).val();
+            console.log("tgtgtgt");
+            $('#error_signup_email').empty();
+
+            $.ajax({
+                url: '{% url 'validate_email' %}',
+                data: {
+                    'email': email
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_taken) {
+                        document.getElementById('error_signup_email').innerHTML="this email id already exist";
+                    }
+                }
+            })
+        });
+    })
+    </script>
+
+
+
 
 </body>
 </html>

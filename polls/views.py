@@ -5,6 +5,7 @@ from django.views.generic import ListView
 from django.contrib.auth.views import login
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 
 class Signup(ListView):
@@ -59,8 +60,24 @@ class Home(ListView):
         return render(request, 'polls/home.html')
 
 
+class ValidateUsername(ListView):
+
+    def get(self, request, *args, **kwargs):
+        username = request.GET.get('username', None)
+        data = {
+            'is_taken': User.objects.filter(username__iexact=username).exists()
+        }
+        return JsonResponse(data)
 
 
+class ValidateEmail(ListView):
+
+    def get(self, request, *args, **kwargs):
+        email = request.GET.get('email', None)
+        data = {
+            'is_taken': User.objects.filter(email__iexact=email).exists()
+        }
+        return JsonResponse(data)
 
 
 
