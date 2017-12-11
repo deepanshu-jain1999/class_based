@@ -15,8 +15,6 @@ from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
 
 
-
-
 class Signup(ListView):
     template_name = 'polls/signup.html'
     form_class = SignupForm
@@ -44,6 +42,9 @@ class Signup(ListView):
                 user = form.save(commit=False)
                 user.is_active = False
                 user.save()
+                print('user-->',user.pk)
+                print(urlsafe_base64_encode(force_bytes(user.pk)))
+                print(account_activation_token.make_token(user))
                 message = 'hello how are you'
                 msg_html = render_to_string('polls/email_content.html', {
                     'user': username,
@@ -117,6 +118,7 @@ class ValidateUsername(ListView):
             return JsonResponse(data)
         else:
             raise Http404
+
 
 class ValidateEmail(ListView):
 
