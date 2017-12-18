@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
-from .forms import SignupForm
-from .models import User
-from django.views.generic import ListView
+from django.shortcuts import render, redirect, reverse
+from .forms import SignupForm, ProfileForm
+from .models import User, Profile
+from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.contrib.auth.views import login
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
+from django.core.urlresolvers import reverse_lazy
+from django.views.generic.edit import UpdateView,  CreateView
 
 
 class Signup(ListView):
@@ -36,28 +38,27 @@ class Signup(ListView):
             email = form.cleaned_data.get('email')
             username = form.cleaned_data.get('username')
             current_site = get_current_site(request)
-            if User.objects.filter(email=email).exists():
-                return render(request, self.template_name, {'form': form})
-            else:
-                user = form.save(commit=False)
-                user.is_active = False
-                user.save()
-                print('user-->',user.pk)
-                print(urlsafe_base64_encode(force_bytes(user.pk)))
-                print(account_activation_token.make_token(user))
-                message = 'hello how are you'
-                msg_html = render_to_string('polls/email_content.html', {
-                    'user': username,
-                    'domain': current_site.domain,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token': account_activation_token.make_token(user),
-
-                })
-                subject = 'Activate your account'
-                from_mail = 'mp3converter2017@gmail.com'
-                to_mail = [email]
-                send_mail(subject, message, from_mail, to_mail, html_message=msg_html, fail_silently=False)
-                return render(request, 'polls/after_email_send.html')
+            # if User.objects.filter(email=email).exists():
+            #     return render(request, self.template_name, {'form': form})
+            #
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            print('user-->',user.pk)
+            print(urlsafe_base64_encode(force_bytes(user.pk)))
+            print(account_activation_token.make_token(user))
+            message = 'hello how are you'
+            msg_html = render_to_string('polls/email_content.html', {
+                'user': username,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+            subject = 'Activate your account'
+            from_mail = 'mp3converter2017@gmail.com'
+            to_mail = [email]
+            send_mail(subject, message, from_mail, to_mail, html_message=msg_html, fail_silently=False)
+            return render(request, 'polls/after_email_send.html')
         else:
             form = self.form_class
         return render(request, self.template_name, {'form': form})
@@ -100,11 +101,22 @@ class Login(ListView):
 
 
 @method_decorator(login_required, name='get')
-class Home(ListView):
+class Home(TemplateView):
     template_name = 'polls/home.html'
+    model = User
 
-    def get(self, request, *args, **kwargs):
-        return render(request, 'polls/home.html')
+    def get_queryset(self):
+        self.user = User.objects.filter(user=self.request.user)
+        return User.objects.filter(user=self.user)
+
+    def get_context_data(self, **kwargs):
+        context = super(Home, self).get_context_data(**kwargs)
+        context['all_user'] = User.objects.all()
+        print(context['all_user'])
+        return context
+
+    # def get(self, request, *args, **kwargs):
+    #     return render(request, 'polls/home.html')
 
 
 class ValidateUsername(ListView):
@@ -133,5 +145,53 @@ class ValidateEmail(ListView):
             raise Http404
 
 
+# class EditProfile(CreateView):
+#     template_name = 'polls/edit_profile.html'
+#     form_class = ProfileForm
+#     model = Profile
+#     success_url = reverse_las
+#     def form_valid(self, form):
+#         form.save(self.request.user)
+#         return super(EditProfile, self).form_valid(form)
+#
+#     def get_success_url(self, *args, **kwargs):
+#         return reverse('home')
+
+class CreateProfile(CreateView):
+    template_name = 'polls/edit_profile.html'
+    form_class = ProfileForm
+    model = User
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        form = self.form_class(self.request.POST)
+        if form.is_valid():
+            profile = form.save(commit=False)
+
+            profile.user_id = self.request.user.id
+            profile.save()
+            print('form is save')
+            return redirect('home')
 
 
+class UpdateProfile(UpdateView):
+    print("hello")
+    model = User
+    template_name = 'polls/edit_profile.html'
+    form_class = ProfileForm
+    success_url = reverse_lazy('home')
+
+    def get_object(self, queryset=None):
+        obj = User.objects.get(user=self.request.user)
+        return obj
+
+
+class About(TemplateView):
+    model = User
+    template_name = 'polls/about_user.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(About, self).get_context_data(**kwargs)
+        search_user = User.objects.filter(username=self.kwargs['username'])
+        context['search_profile'] = Profile.objects.get(user=search_user)
+        return context
