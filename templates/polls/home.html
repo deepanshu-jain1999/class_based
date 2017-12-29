@@ -5,6 +5,9 @@
     <title>Title</title>
 </head>
 <body>
+  <div class="row">
+    <div class="col-md-6 text-right">Time:-{% now "jS F Y H:i" %}</div>
+  </div>
 <a href="{% url 'logout' %}">logout</a><br>
 <a href="{% url 'create_profile' user.username %}">edit profile</a>
 <a href="{% url 'update_profile' user.id %}">update profile</a>
@@ -13,10 +16,21 @@
 <div class="container">
 {% for user in all_user %}
 <div>
-    <a href="{% url 'about_user' user.username %}"> {{ user.username  }}</a>
+    <a href="{% url 'about_user' user.username %}"> {{ user.username|capfirst  }}</a>
 </div>
 {% endfor %}
+{% lorem 2 w random %}
+It is {% now "jS F Y H:i" %}
+It is {% now "SHORT_DATETIME_FORMAT" %}
 </div>
+{% autoescape off %}
+    {{ |escape }}
+{% endautoescape %}
+{% url 'create_profile' user.username as the_url %}
+
+<a href="{{ the_url }}">I'm linking to {{ the_url }}</a>
+
+
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>

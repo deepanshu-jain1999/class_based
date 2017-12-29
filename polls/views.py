@@ -15,6 +15,8 @@ from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic.edit import UpdateView,  CreateView
+from django.template import Context, Template, RequestContext
+from django.http import HttpResponse
 
 
 class Signup(ListView):
@@ -195,3 +197,15 @@ class About(TemplateView):
         search_user = User.objects.filter(username=self.kwargs['username'])
         context['search_profile'] = Profile.objects.get(user=search_user)
         return context
+
+
+def ip_address_processor(request):
+    return {'ip_address': request.META['REMOTE_ADDR']}
+
+
+def learn(request):
+    template = Template("hello {{name}}: {{ip_address}}")
+    context = RequestContext(request, {'name': 'deep'}, [ip_address_processor])
+    return HttpResponse(template.render(context))
+
+
