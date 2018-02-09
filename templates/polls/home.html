@@ -24,7 +24,7 @@ It is {% now "jS F Y H:i" %}
 It is {% now "SHORT_DATETIME_FORMAT" %}
 </div>
 {% autoescape off %}
-    {{ |escape }}
+{#    {{ |escape }}#}
 {% endautoescape %}
 {% url 'create_profile' user.username as the_url %}
 

@@ -13,7 +13,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 from .tokens import account_activation_token
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView,  CreateView
 from django.template import Context, Template, RequestContext
 from django.http import HttpResponse
