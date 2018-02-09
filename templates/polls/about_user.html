@@ -10,6 +10,10 @@
 <p>CITY- {{ search_profile.city }}</p>
 <p>BIO- {{ search_profile.bio }}</p>
 <p>STATUS- {{ search_profile.status }}</p>
+{% if request.user.username == search_user %}
+<a href="{% url 'update_profile' request.user.id %}">update profile</a>
+
+{% endif %}
 </body>
 </html>
 

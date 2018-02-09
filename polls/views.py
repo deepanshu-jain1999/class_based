@@ -77,6 +77,7 @@ class Activate(ListView):
         print("------>", user)
         if user is not None and account_activation_token.check_token(user, self.kwargs['token']):
             user.is_active = True
+            profile = Profile.objects.create(user=user)
             user.save()
             login(request, user)
             return redirect('home')
@@ -193,7 +194,8 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(About, self).get_context_data(**kwargs)
         search_user = User.objects.get(username=self.kwargs['username'])
-        context['search_profile'] = Profile.objects.get_or_create(user=search_user)[0]
+        context['search_profile'] = Profile.objects.get(user=search_user)
+        context['search_user'] = self.kwargs['username']
         return context
 
 
