@@ -9,7 +9,7 @@
     <div class="col-md-6 text-right">Time:-{% now "jS F Y H:i" %}</div>
   </div>
 <a href="{% url 'logout' %}">logout</a><br>
-<a href="{% url 'create_profile' user.username %}">edit profile</a>
+
 <a href="{% url 'update_profile' user.id %}">update profile</a>
 <h1>welcome - {{ user.username }}</h1>
 
@@ -26,7 +26,7 @@ It is {% now "SHORT_DATETIME_FORMAT" %}
 {% autoescape off %}
 {#    {{ |escape }}#}
 {% endautoescape %}
-{% url 'create_profile' user.username as the_url %}
+{% url 'update_profile' user.username as the_url %}
 
 <a href="{{ the_url }}">I'm linking to {{ the_url }}</a>
 

@@ -46,14 +46,11 @@ class Signup(ListView):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-            print('user-->',user.pk)
-            print(urlsafe_base64_encode(force_bytes(user.pk)))
-            print(account_activation_token.make_token(user))
             message = 'hello how are you'
             msg_html = render_to_string('polls/email_content.html', {
                 'user': username,
                 'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
                 'token': account_activation_token.make_token(user),
             })
             subject = 'Activate your account'
@@ -159,21 +156,23 @@ class ValidateEmail(ListView):
 #     def get_success_url(self, *args, **kwargs):
 #         return reverse('home')
 
-class CreateProfile(CreateView):
-    template_name = 'polls/edit_profile.html'
-    form_class = ProfileForm
-    model = User
-    success_url = reverse_lazy('home')
-
-    def form_valid(self, form):
-        form = self.form_class(self.request.POST)
-        if form.is_valid():
-            profile = form.save(commit=False)
-
-            profile.user_id = self.request.user.id
-            profile.save()
-            print('form is save')
-            return redirect('home')
+# class CreateProfile(CreateView):
+#     template_name = 'polls/edit_profile.html'
+#     if d
+#     form_class = ProfileForm
+#
+#     model = User
+#     success_url = reverse_lazy('home')
+#
+#     def form_valid(self, form):
+#         form = self.form_class(self.request.POST)
+#         if form.is_valid():
+#             profile = form.save(commit=False)
+#
+#             profile.user_id = self.request.user.id
+#             profile.save()
+#             print('form is save')
+#             return redirect('home')
 
 
 class UpdateProfile(UpdateView):
@@ -184,9 +183,8 @@ class UpdateProfile(UpdateView):
     success_url = reverse_lazy('home')
 
     def get_object(self, queryset=None):
-        obj = User.objects.get(user=self.request.user)
+        obj = Profile.objects.get_or_create(user=self.request.user)[0]
         return obj
-
 
 class About(TemplateView):
     model = User
@@ -194,8 +192,8 @@ class About(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(About, self).get_context_data(**kwargs)
-        search_user = User.objects.filter(username=self.kwargs['username'])
-        context['search_profile'] = Profile.objects.get(user=search_user)
+        search_user = User.objects.get(username=self.kwargs['username'])
+        context['search_profile'] = Profile.objects.get_or_create(user=search_user)[0]
         return context
 
 
