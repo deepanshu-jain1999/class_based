@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from .forms import SignupForm, ProfileForm
-from .models import User, Profile
+from .models import User, Profile, LikeProfile
 from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.contrib.auth.views import login
 from django.utils.decorators import method_decorator
@@ -78,6 +78,8 @@ class Activate(ListView):
         if user is not None and account_activation_token.check_token(user, self.kwargs['token']):
             user.is_active = True
             profile = Profile.objects.create(user=user)
+            profile_instance = Profile.objects.get(user=user)
+            like_profile = LikeProfile.objects.create(profile=profile_instance)
             user.save()
             login(request, user)
             return redirect('home')
@@ -112,7 +114,7 @@ class Home(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Home, self).get_context_data(**kwargs)
         context['all_user'] = User.objects.all()
-        print(context['all_user'])
+        # print(context['all_user'])
         return context
 
     # def get(self, request, *args, **kwargs):
@@ -145,37 +147,6 @@ class ValidateEmail(ListView):
             raise Http404
 
 
-# class EditProfile(CreateView):
-#     template_name = 'polls/edit_profile.html'
-#     form_class = ProfileForm
-#     model = Profile
-#     success_url = reverse_las
-#     def form_valid(self, form):
-#         form.save(self.request.user)
-#         return super(EditProfile, self).form_valid(form)
-#
-#     def get_success_url(self, *args, **kwargs):
-#         return reverse('home')
-
-# class CreateProfile(CreateView):
-#     template_name = 'polls/edit_profile.html'
-#     if d
-#     form_class = ProfileForm
-#
-#     model = User
-#     success_url = reverse_lazy('home')
-#
-#     def form_valid(self, form):
-#         form = self.form_class(self.request.POST)
-#         if form.is_valid():
-#             profile = form.save(commit=False)
-#
-#             profile.user_id = self.request.user.id
-#             profile.save()
-#             print('form is save')
-#             return redirect('home')
-
-
 class UpdateProfile(UpdateView):
     print("hello")
     model = User
@@ -187,6 +158,7 @@ class UpdateProfile(UpdateView):
         obj = Profile.objects.get_or_create(user=self.request.user)[0]
         return obj
 
+
 class About(TemplateView):
     model = User
     template_name = 'polls/about_user.html'
@@ -196,6 +168,7 @@ class About(TemplateView):
         search_user = User.objects.get(username=self.kwargs['username'])
         context['search_profile'] = Profile.objects.get(user=search_user)
         context['search_user'] = self.kwargs['username']
+        context['like_profile'] = LikeProfile.objects.get(profile__user=search_user)
         return context
 
 
@@ -208,4 +181,28 @@ def learn(request):
     context = RequestContext(request, {'name': 'deep'}, [ip_address_processor])
     return HttpResponse(template.render(context))
 
+
+@login_required
+def like(request):
+    imgid = None
+    if request.method == 'GET':
+        data = dict()
+        imgid = request.GET['imgid']
+        img = LikeProfile.objects.get(id=int(imgid))
+        if request.user in img.like_user.all():
+            img.like_user.remove(request.user)
+            img.like_status = 0
+            img.save()
+        else:
+            img.like_user.add(request.user)
+            img.like_status = 1
+            img.save()
+        a = img.like_user.count()
+        b = img.like_status
+        data = {
+            'count_like': a,
+            'state_image': b
+        }
+
+        return JsonResponse(data)
 

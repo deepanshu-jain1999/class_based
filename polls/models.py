@@ -14,6 +14,17 @@ class Profile(models.Model):
         return self.user.username
 
 
+class LikeProfile(models.Model):
+    like_user = models.ManyToManyField(User, blank=True, related_name='liked_user')
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='profile')
+    like_status = models.IntegerField(default=0)
+    like_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.profile.user.username
+
+
+
 
 
 

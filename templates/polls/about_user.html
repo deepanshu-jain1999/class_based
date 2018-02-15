@@ -1,19 +1,65 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 </head>
 <body>
+{% if request.user.username == search_user %}
+<a href="{% url 'update_profile' request.user.id %}">update profile</a>
+
+{% endif %}
 <h1>hello</h1>
 <p>NAME- {{ search_profile.name }}<p>
 <p>CITY- {{ search_profile.city }}</p>
 <p>BIO- {{ search_profile.bio }}</p>
 <p>STATUS- {{ search_profile.status }}</p>
-{% if request.user.username == search_user %}
-<a href="{% url 'update_profile' request.user.id %}">update profile</a>
 
+
+<small class="text-muted" id="count_like{{ like_profile.id }}">{{ like_profile.like_user.count}}</small> likes<br>
+{% if user in like_profile.like_user.all %}
+
+    <i  class="display1 fa fa-heart nav-link" aria-hidden="true" id="like{{ like_profile.id }}" data-imgid="{{ like_profile.id }}"> Like</i>
+    <br><br>
+
+{% else %}
+    <i  class="display1 fa fa-heart-o nav-link" aria-hidden="true" id="like{{ like_profile.id }}" data-imgid="{{ like_profile.id }}"> Like</i>
+    <br><br>
 {% endif %}
+
+
+
+<script>
+    $(document).ready(function() {
+        $(".display1").on('click', function () {
+            var imgid = $(this).attr("data-imgid");
+            $.ajax({
+                url: '{% url 'like' %}',
+                data: {
+                    'imgid': imgid
+                },
+                success: function (data) {
+                          console.log("this ----"+data.state_image);
+                          console.log(data.count_like);
+                          $('#count_like' + imgid).html(data.count_like);
+                          var status = data.state_image;
+                          if (status == 0){
+                              $('#like' + imgid).toggleClass('fa-heart', false);
+                              $('#like' + imgid).toggleClass('fa-heart-o', true);
+                          }
+                          else {
+                               $('#like' + imgid).toggleClass('fa-heart-o', false);
+                              $('#like' + imgid).toggleClass('fa-heart', true);
+                          }
+                }
+            })
+        })
+               })
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </body>
 </html>
 
