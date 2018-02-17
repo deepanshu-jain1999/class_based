@@ -24,6 +24,25 @@ class LikeProfile(models.Model):
         return self.profile.user.username
 
 
+class Comment(models.Model):
+    comment_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    comment_time = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField()
+    inner_com = models.ForeignKey('Comment',
+                                      on_delete=models.CASCADE,
+                                      blank=True,
+                                      null=True,
+                                      related_name='inner_comment')
+
+    class Meta:
+        ordering = ('comment_time',)
+
+    def __str__(self):
+        return str(self.id)
+
+
+
 
 
 

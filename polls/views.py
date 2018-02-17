@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from .forms import SignupForm, ProfileForm
-from .models import User, Profile, LikeProfile
+from .models import User, Profile, LikeProfile, Comment
 from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.contrib.auth.views import login
 from django.utils.decorators import method_decorator
@@ -166,9 +166,11 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(About, self).get_context_data(**kwargs)
         search_user = User.objects.get(username=self.kwargs['username'])
+        profile = Profile.objects.get(user=search_user)
         context['search_profile'] = Profile.objects.get(user=search_user)
         context['search_user'] = self.kwargs['username']
         context['like_profile'] = LikeProfile.objects.get(profile__user=search_user)
+        context['comment'] = list(Comment.objects.filter(profile=profile).order_by('-comment_time'))
         return context
 
 
@@ -182,27 +184,59 @@ def learn(request):
     return HttpResponse(template.render(context))
 
 
-@login_required
-def like(request):
-    imgid = None
-    if request.method == 'GET':
-        data = dict()
-        imgid = request.GET['imgid']
-        img = LikeProfile.objects.get(id=int(imgid))
-        if request.user in img.like_user.all():
-            img.like_user.remove(request.user)
-            img.like_status = 0
-            img.save()
+class Like(ListView):
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            imgid = request.GET['imgid']
+            img = LikeProfile.objects.get(id=int(imgid))
+            if request.user in img.like_user.all():
+                img.like_user.remove(request.user)
+                img.like_status = 0
+                img.save()
+            else:
+                img.like_user.add(request.user)
+                img.like_status = 1
+                img.save()
+            a = img.like_user.count()
+            b = img.like_status
+            data = {
+                'count_like': a,
+                'state_image': b
+            }
+
+            return JsonResponse(data)
+
         else:
-            img.like_user.add(request.user)
-            img.like_status = 1
-            img.save()
-        a = img.like_user.count()
-        b = img.like_status
-        data = {
-            'count_like': a,
-            'state_image': b
-        }
+            raise Http404
 
-        return JsonResponse(data)
 
+class CommentProfile(ListView):
+
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            proid = request.GET['proid']
+            try:
+                par_com = request.GET['par_com']
+            except:
+                par_com = None
+            pro = Profile.objects.get(id=int(proid))
+            user = User.objects.get(username=self.request.user)
+            username = user.username
+            comment = request.GET['comment']
+            comm = Comment.objects.create(comment_user=user, profile=pro, comment=comment)
+
+            if par_com:
+                parent_comment = Comment.objects.get(id=int(par_com))
+                comm.inner_com = parent_comment
+
+            else:
+                comm.inner_com = None
+            comm.save()
+            data = {
+                'comment': str(comment),
+                'user': str(username)
+            }
+            return JsonResponse(data)
+
+        else:
+            raise Http404

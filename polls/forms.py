@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile, Comment
 from django.contrib.auth.forms import UserCreationForm
 
 
@@ -25,3 +25,8 @@ class ProfileForm(forms.ModelForm):
     #     return instance
 
 
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = Comment
+        fields = ('comment',)

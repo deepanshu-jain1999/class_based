@@ -26,7 +26,8 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/edit_again/$', views.UpdateProfile.as_view(), name='update_profile'),
     url(r'^about/(?P<username>\w+)/$', views.About.as_view(), name='about_user'),
     url(r'^learn/$', views.learn, name='learn'),
-    url(r'^like/$', views.like, name='like'),
+    url(r'^like/$', views.Like.as_view(), name='like'),
+    url(r'^comment/$', views.CommentProfile.as_view(), name='comment'),
 
 
 

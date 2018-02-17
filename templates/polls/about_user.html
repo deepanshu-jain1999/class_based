@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{% static 'polls/javascript/ajax.js' %}"></script>
 </head>
 <body>
 {% if request.user.username == search_user %}
@@ -28,10 +29,35 @@
     <i  class="display1 fa fa-heart-o nav-link" aria-hidden="true" id="like{{ like_profile.id }}" data-imgid="{{ like_profile.id }}"> Like</i>
     <br><br>
 {% endif %}
+<p id="show_user{{ search_profile.id }}"></p>
+{% for com in comment %}
+    {% if com.inner_com is null %}
+        {{ com.comment_user.username }}:{{ com.comment }}---{{ com.comment_time }}
 
-
+        <button data-com="{{ com.id }}" class="child_comment">Reply</button><br>
+        <input class="input_comment" hidden type="text" id="child_com{{com.pk}}"
+               data-pro="{{ search_profile.pk }}" data-par="{{ com.id }}" placeholder="Reply.."><br>
+        {% for incom in comment %}
+             {% if incom.inner_com is not none and incom.inner_com.id == com.id %}
+                 <h4 style="margin: 0"><span style="display:inline-block; width:5%;"></span>  {{ incom.comment_user.username }}:{{ incom.comment }}---{{ incom.comment_time }}</h4><br>
+             {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+<input class="comment" type="text" data-c="{{search_profile.pk}}" placeholder="Enter a comment"><br>
 
 <script>
+     $(document).ready(function() {
+     $(".child_comment").on('click', function(){
+         console.log('sure');
+            var com_id = $(this).attr('data-com');
+             console.log(com_id);
+            $("#child_com"+com_id).removeAttr('hidden')
+        })
+     })
+</script>
+<script>
+
     $(document).ready(function() {
         $(".display1").on('click', function () {
             var imgid = $(this).attr("data-imgid");
@@ -60,6 +86,62 @@
 </script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+
+
+<script>
+    $(document).ready(function() {
+        $(".comment").on('keypress', function (event) {
+            key = event.keyCode;
+            if (key==13){
+
+            var proid = $(this).attr("data-c");
+            var comment = $(this).val();
+            $.ajax({
+                url: '{% url 'comment' %}',
+                data: {
+                    'proid': proid,
+                    'comment': comment
+                },
+                success: function (data) {
+                           $('#show_user' + proid).append(data.user+":"+data.comment+'<br>');
+
+
+
+                }
+            })
+            }
+        })
+    })
+</script>
+{#for inner comments#}
+<script>
+    $(document).ready(function() {
+        $(".input_comment").on('keypress', function (event) {
+            key = event.keyCode;
+            if (key==13){
+
+            var proid = $(this).attr("data-pro");
+            var comment = $(this).val();
+            var par_com = $(this).attr('data-par');
+            console.log("-----"+par_com);
+            $.ajax({
+                url: '{% url 'comment' %}',
+                data: {
+                    'proid': proid,
+                    'comment': comment,
+                    'par_com': par_com
+                },
+                success: function (data) {
+                           $('#show_user' + proid).append(data.user+":"+data.comment+'<br>');
+
+
+
+                }
+            })
+            }
+        })
+    })
+</script>
 </body>
 </html>
 
